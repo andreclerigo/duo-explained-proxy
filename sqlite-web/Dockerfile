@@ -2,14 +2,6 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install sqlite-web
 RUN pip install sqlite-web
 
-# Copy start script
-COPY start_sqlite_web.py .
-
-# Expose SQLite Web UI port
-EXPOSE 5002
-
-# Run SQLite Web Admin
-CMD ["python", "start_sqlite_web.py"]
+CMD ["sqlite_web", "data/usage_logs.db", "--host", "0.0.0.0", "--port", "5002"]
