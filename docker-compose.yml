@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  proxy_server:
+    build: ./proxy
+    container_name: proxy_server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data  # Shared folder for SQLite DB
+
+  sqlite_admin:
+    build: ./sqlite-web
+    container_name: sqlite_admin
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/app/data  # Same folder to access the same DB
