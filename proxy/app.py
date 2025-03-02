@@ -1,33 +1,46 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional
 from services.usage_logger_sqlite import UsageLoggerSQLite
 from services.ai_backend import AIBackend
 from config import DAILY_REQUEST_LIMIT, OPENAI_API_KEY, BACKEND_TYPE
+import os
 
-app = Flask(__name__)
+# Ensure the data directory exists (important for Docker volume mounting)
+os.makedirs("data", exist_ok=True)
 
+# FastAPI app instance
+app = FastAPI()
+
+# Initialize the logger and backend
 usage_logger = UsageLoggerSQLite("data/usage_logs.db")
-
-# Initialize modular backend
 ai_backend = AIBackend(backend_type=BACKEND_TYPE, api_key=OPENAI_API_KEY)
 
-@app.route("/proxy", methods=["POST"])
-def proxy_request():
-    data = request.json
-    if not data:
-        return jsonify({"error": "Missing JSON body"}), 400
+# Request body model (replaces Flask `request.json`)
+class ProxyRequest(BaseModel):
+    source: Optional[str] = "unknown_source"
+    prompt: str
 
-    source = data.get("source", "unknown_source")
-    prompt = data.get("prompt", "")
+@app.post("/proxy")
+def proxy_request(req: ProxyRequest):
+    print("Received request")
 
     if not usage_logger.is_within_limit(DAILY_REQUEST_LIMIT):
-        return jsonify({"error": "Daily request limit exceeded"}), 429
+        raise HTTPException(status_code=429, detail="Daily request limit exceeded")
 
-    usage_logger.log_request(source, prompt)
+    usage_logger.log_request(req.source, req.prompt)
 
-    response_text = ai_backend.get_response(prompt)
+    response_text = ai_backend.get_response(req.prompt)
 
-    return jsonify({
-        "source": source,
-        "prompt": prompt,
+    return {
+        "source": req.source,
+        "prompt": req.prompt,
         "response": response_text
-    }), 200
+    }
+
+@app.get("/usage")
+def get_usage():
+    return {
+        "total_usage_today": usage_logger.get_daily_count(),
+        "recent_logs": usage_logger.get_logs()
+    }
