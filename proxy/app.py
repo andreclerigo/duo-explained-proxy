@@ -3,7 +3,8 @@ from pydantic import BaseModel
 from typing import Optional
 from services.usage_logger_sqlite import UsageLoggerSQLite
 from services.ai_backend import AIBackend
-from config import DAILY_REQUEST_LIMIT, OPENAI_API_KEY, BACKEND_TYPE
+from config import DAILY_REQUEST_LIMIT, BACKEND_TYPE
+import logging
 import os
 
 # Ensure the data directory exists (important for Docker volume mounting)
@@ -11,10 +12,11 @@ os.makedirs("data", exist_ok=True)
 
 # FastAPI app instance
 app = FastAPI()
+logging.basicConfig(level=logging.INFO)
 
 # Initialize the logger and backend
 usage_logger = UsageLoggerSQLite("data/usage_logs.db")
-ai_backend = AIBackend(backend_type=BACKEND_TYPE, api_key=OPENAI_API_KEY)
+ai_backend = AIBackend(backend_type=BACKEND_TYPE)
 
 # Request body model (replaces Flask `request.json`)
 class ProxyRequest(BaseModel):
@@ -23,8 +25,6 @@ class ProxyRequest(BaseModel):
 
 @app.post("/proxy")
 def proxy_request(req: ProxyRequest):
-    print("Received request")
-
     if not usage_logger.is_within_limit(DAILY_REQUEST_LIMIT):
         raise HTTPException(status_code=429, detail="Daily request limit exceeded")
 

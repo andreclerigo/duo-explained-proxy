@@ -5,13 +5,12 @@ class ChatGPTBackend:
     Backend handler for OpenAI's ChatGPT.
     """
 
-    def __init__(self, api_key: str):
-        self.api_key = api_key
+    def __init__(self):
         self.url = "https://api.openai.com/v1/chat/completions"
 
-    def get_response(self, prompt: str) -> str:
+    def get_response(self, prompt: str, api_key: str) -> str:
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
