@@ -1,52 +1,24 @@
-# services/ai_backend.py
-
-import os
-import requests
-from typing import Optional
-
-# If you plan to use OpenAI:
-# import openai
-
-# from config import OPENAI_API_KEY
+from services.backends.chatgpt import ChatGPTBackend
+# from services.backends.local_model import LocalModelBackend
 
 class AIBackend:
     """
-    An example AI backend class that can be adapted to different providers.
+    Middleware that abstracts calls to different backend implementations.
     """
 
-    def __init__(self, backend_type: str = "openai", api_key: Optional[str] = None):
+    def __init__(self, backend_type: str = "openai", api_key: str = None):
         self.backend_type = backend_type
-        self.api_key = api_key  # For OpenAI or other providers
+        self.api_key = api_key
 
-        # If using openai
-        # if self.backend_type == "openai" and self.api_key:
-        #     openai.api_key = self.api_key
+        if backend_type == "openai":
+            self.backend = ChatGPTBackend(api_key)
+        # elif backend_type == "local":
+        #     self.backend = LocalModelBackend()
+        else:
+            raise ValueError(f"Unknown backend type: {backend_type}")
 
     def get_response(self, prompt: str) -> str:
         """
-        Retrieves an AI-generated response given a user prompt.
-        Adjust this method to match your chosen backend’s API calls.
+        Forwards request to selected backend.
         """
-
-        if self.backend_type == "openai":
-            return self._handle_openai(prompt)
-
-        # If you have some local model or another endpoint:
-        # elif self.backend_type == "my_local_model":
-        #     return self._handle_local_model(prompt)
-
-        return "No valid backend configured."
-
-    def _handle_openai(self, prompt: str) -> str:
-        # Example using OpenAI's ChatCompletion endpoint
-        # import openai
-        # response = openai.ChatCompletion.create(
-        #     model="gpt-3.5-turbo",
-        #     messages=[{"role": "user", "content": prompt}]
-        # )
-        # return response["choices"][0]["message"]["content"]
-        return "(mock) This is where you'd call the OpenAI API, e.g., ChatCompletion."
-
-    def _handle_local_model(self, prompt: str) -> str:
-        # Example placeholder for local model integration
-        return "(mock) This is where you'd query your local LLM."
+        return self.backend.get_response(prompt)
