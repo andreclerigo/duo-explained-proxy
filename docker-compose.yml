@@ -5,7 +5,7 @@ services:
     build: ./proxy
     container_name: proxy_server
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./data:/app/data  # Shared folder for SQLite DB
 
@@ -15,4 +15,4 @@ services:
     ports:
       - "5002:5002"
     volumes:
-      - ./data:/app/data  # Same folder to access the same DB
+      - ./data:/app/data:ro
