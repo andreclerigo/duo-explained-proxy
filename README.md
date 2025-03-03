@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project implements a **modular AI Proxy Server** that acts as an intermediary between end-users and backend AI models (like OpenAI's GPT).
+This project implements a **modular AI Proxy Server** that acts as an intermediary between end-users and backend AI models (like OpenAI's ChatGPT).
 
 The primary goal is to allow users to send requests to this proxy server without needing their own API key for the AI provider, centralizing API management and usage tracking.
 
