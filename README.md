@@ -10,6 +10,7 @@ This project was created to provide users of the [Duo Explained](https://github.
 
 The server logs requests, tracks usage, and enforces a **daily request limit** to control how many queries the proxy can handle per day. Once the limit is reached, the proxy responds with a `429 Too Many Requests` error. The usage data is stored in a **SQLite database**, and a simple **SQLite Admin Web Interface** (using `sqlite-web`) is used to inspect the logs visually.
 
+
 ---
 
 ## Project Objectives
