@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from services.usage_logger_sqlite import UsageLoggerSQLite
@@ -13,6 +14,15 @@ os.makedirs("data", exist_ok=True)
 # FastAPI app instance
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
+
+# Allow all origins (unsafe, but good for testing)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all domains (change this to specific domains in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Initialize the logger and backend
 usage_logger = UsageLoggerSQLite("data/usage_logs.db")
