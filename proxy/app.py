@@ -1,10 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from services.usage_logger_sqlite import UsageLoggerSQLite
 from services.ai_backend import AIBackend
-from config import DAILY_REQUEST_LIMIT, BACKEND_TYPE
+from config import DAILY_REQUEST_LIMIT, BACKEND_TYPE, CORS_ALLOWED_ORIGINS, BLOCKED_USER_AGENTS
 import logging
 import os
 
@@ -18,10 +18,10 @@ logging.basicConfig(level=logging.INFO)
 # Allow all origins (unsafe, but good for testing)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all domains (change this to specific domains in production)
+    allow_origins=CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET", "POST"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],            # Allows all headers
 )
 
 # Initialize the logger and backend
@@ -34,7 +34,16 @@ class ProxyRequest(BaseModel):
     prompt: str
 
 @app.post("/proxy")
-def proxy_request(req: ProxyRequest):
+def proxy_request(req: ProxyRequest, request: Request):
+    user_agent = request.headers.get("User-Agent", "").lower()
+    origin = request.headers.get("Origin")
+    
+    if any(bot in user_agent for bot in BLOCKED_USER_AGENTS):
+        raise HTTPException(status_code=403, detail="Forbidden Request")
+    
+    if not origin or origin not in CORS_ALLOWED_ORIGINS:
+        raise HTTPException(status_code=403, detail="Forbidden Request")
+
     if not usage_logger.is_within_limit(DAILY_REQUEST_LIMIT):
         raise HTTPException(status_code=429, detail="Daily request limit exceeded")
 

@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   proxy_server:
+    restart: always
     build: ./proxy
     container_name: proxy_server
     ports:
@@ -10,6 +11,7 @@ services:
       - ./data:/app/data  # Shared folder for SQLite DB
 
   sqlite_admin:
+    restart: always
     build: ./sqlite-web
     container_name: sqlite_admin
     ports:

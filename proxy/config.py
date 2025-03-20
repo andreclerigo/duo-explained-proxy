@@ -10,6 +10,14 @@ DAILY_REQUEST_LIMIT = int(os.getenv("DAILY_REQUEST_LIMIT", "100"))
 OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS", "")
 API_KEYS_LIST = [key.strip() for key in OPENAI_API_KEYS.split(",") if key.strip()]
 
+# Load CORS ALLOWED ORIGINS
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS.split(",") if origin.strip()]
+
+# Load BLOCKED USER AGENTS
+BLOCKED_USER_AGENTS = os.getenv("BLOCKED_USER_AGENTS", "")
+BLOCKED_USER_AGENTS = [agent.strip() for agent in BLOCKED_USER_AGENTS.split(",") if agent.strip()]
+
 BACKEND_TYPE = os.getenv("BACKEND_TYPE", "openai")
 
 if not API_KEYS_LIST:
